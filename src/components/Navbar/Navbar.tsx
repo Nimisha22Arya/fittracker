@@ -7,9 +7,35 @@ import Image from 'next/image'
 import Link from 'next/link'
 import AuthPopup from '../AuthPopup/AuthPopup'
 const Navbar = () => {
-  const[isloggedin,setisloggedin]=React.useState<boolean>(false)
+  const[isloggedin,setIsloggedin]=React.useState<boolean>(false)
 
   const[showpopup,setshowpopup]=React.useState<boolean>(false)
+
+  const checklogin = async () => {
+    fetch(process.env.NEXT_PUBLIC_BACKEND_API + '/auth/checklogin', {
+        method: 'POST',
+        credentials: 'include',
+    })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data)
+            if (data.ok) {
+                setIsloggedin(true)
+            }
+            else{
+                setIsloggedin(false)
+            }
+        })
+        .catch(err => {
+            console.log(err)
+        })
+}
+
+
+React.useEffect(() => {
+    checklogin()
+}, [showpopup])
+
   return (
     <nav>
       <Image src= {logo} alt="Logo"/>
@@ -17,6 +43,7 @@ const Navbar = () => {
       <Link href='/about'>About</Link>
       <Link href='/profile'><IoIosBody></IoIosBody></Link>
       {
+        
         isloggedin ?
         <button>Logout</button>
         :
@@ -27,7 +54,7 @@ const Navbar = () => {
         >Login</button>
       }
       {
-        showpopup && <AuthPopup/>
+        showpopup && <AuthPopup setShowpopup={setshowpopup}/>
       }
     </nav>
   )
